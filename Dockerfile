@@ -1,19 +1,19 @@
-# Use a lightweight Python image
+# Use a lightweight Python base image
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements and install them
+# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy your app code
+# Copy app files
 COPY . .
 
-# Set the command to run the app with gunicorn
-CMD ["gunicorn", "-w", "4", "app:app"]
-
-# Cloud Run expects the service to listen on port 8080
+# Cloud Run expects the app to listen on 0.0.0.0:8080
 ENV PORT=8080
 EXPOSE 8080
+
+# Start with Gunicorn using the appropriate Flask WSGI setup
+CMD ["gunicorn", "-w", "4", "-k", "gthread", "-b", "0.0.0.0:8080", "app:app"]
