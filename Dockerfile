@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Set the command to run the app with gunicorn
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app"]
+CMD ["gunicorn", "-w", "4", "app:app"]
 
 # Cloud Run expects the service to listen on port 8080
 ENV PORT=8080
