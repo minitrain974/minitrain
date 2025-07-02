@@ -51,4 +51,5 @@ def index():
     return render_template("index.html", pois=POIS, gmaps_key=os.getenv("GMAPS_KEY", "AIzaSyC2X6kzSDV9E2wo9wqr4ruQGQalETa7FK0ελα "))
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
