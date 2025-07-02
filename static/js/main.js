@@ -1,62 +1,56 @@
-/* ===== main.js – πλήρης έκδοση με:
+/* ===== main.js – πλήρης έκδοση =====
    • toggle POI sidebar
    • InfoWindow (όνομα) σε κάθε marker
    • κουμπί Καθαρισμός
    • POI-checkboxes + user markers + συνολική απόσταση
-   =================================================== */
+   • single-click = marker, double-click = zoom (χωρίς marker)
+   =================================== */
 
    let map;
    let directionsService;
    let directionsRenderer;
-   let clickTimeout;
    
-   const routeMarkers   = [];   // όλοι οι markers (user + ενεργοί POIs) με τη σειρά που μπήκαν
-   const poiMarkerRefs  = {};   // poiId ➜ marker (για εύκολη αφαίρεση)
+   const routeMarkers  = [];   // όλοι οι markers (user + ενεργοί POIs) με τη σειρά που μπήκαν
+   const poiMarkerRefs = {};   // poiId → marker
    
-   const RED_PIN = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+   const RED_PIN = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
    
    /* ──────────── ΚΑΘΑΡΙΣΜΟΣ ──────────── */
    function clearRoute() {
-     // 1. σβήσε όλους τους markers από τον χάρτη
      routeMarkers.forEach(m => m.setMap(null));
      routeMarkers.length = 0;
    
-     // 2. άδειασε refs POI
      Object.values(poiMarkerRefs).forEach(m => m.setMap(null));
      for (const id in poiMarkerRefs) delete poiMarkerRefs[id];
    
-     // 3. ξε-τικαρέ όλα τα checkbox POI
      document.querySelectorAll('#poi-list input[type="checkbox"]')
              .forEach(cb => (cb.checked = false));
    
-     // 4. καθάρισε λίστα & απόσταση
      document.getElementById('points-list').innerHTML = '';
      document.getElementById('total-distance').textContent =
        'Συνολική Απόσταση: 0 km';
    
-     // 5. σβήσε polyline
      directionsRenderer.set('directions', null);
    }
    
-   /* ──────────── INITIALISATION ──────────── */
+   /* ──────────── INIT ──────────── */
    function initMap() {
      map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 38.291584, lng: 21.793645 },
-        zoom: 16,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        zoomControl: true,  // Ενεργοποίηση κουμπιών zoom
-        zoomControlOptions: {
-            style: google.maps.ZoomControlStyle.LARGE,  // Είδος κουμπιών: LARGE ή SMALL
-            position: google.maps.ControlPosition.BOTTOM_CENTER  // Θέση κουμπιών (π.χ., πάνω αριστερά)
-        },
-        language: 'el'
+       center: { lat: 38.291584, lng: 21.793645 },
+       zoom: 16,
+       mapTypeId: google.maps.MapTypeId.ROADMAP,
+       zoomControl: true,
+       zoomControlOptions: {
+         style: google.maps.ZoomControlStyle.LARGE,
+         position: google.maps.ControlPosition.BOTTOM_CENTER
+       },
+       language: 'el'
      });
-
    
      directionsService  = new google.maps.DirectionsService();
      directionsRenderer = new google.maps.DirectionsRenderer({
        map,
-       suppressMarkers: true    // χρησιμοποιούμε δικούς μας markers
+       suppressMarkers: true
      });
    
      /* κουμπιά */
@@ -73,19 +67,17 @@
        });
      });
    
-    
-     /* click στο χάρτη για user marker */
-     clickTimeout = setTimeout(() => {
-        map.addListener('click', e => addUserMarker(e.latLng));
-     }, 250);
-
+     /* single-click για marker | double-click για zoom (χωρίς marker) */
+     let singleClickTimer;
+     map.addListener('click', (e) => {
+       singleClickTimer = setTimeout(() => addUserMarker(e.latLng), 250);
+     });
      map.addListener('dblclick', () => {
-        // Αν γίνει διπλό κλικ, ακυρώνει το single click
-        clearTimeout(clickTimeout);
+       clearTimeout(singleClickTimer);   // ακυρώνει την προσθήκη marker
      });
    }
    
-   /* ──────────── POI SIDEBAR ──────────── */
+   /* ──────────── TOGGLE SIDEBAR ──────────── */
    function togglePoiSidebar() {
      const sb = document.getElementById('poi-sidebar');
      sb.style.width = sb.style.width === '250px' ? '0' : '250px';
@@ -93,7 +85,7 @@
    
    /* ──────────── POI MARKERS ──────────── */
    function addPoiMarker(id) {
-     if (poiMarkerRefs[id]) return;          // υπάρχει ήδη
+     if (poiMarkerRefs[id]) return;
      const poi = POIS.find(p => p.id === id);
      if (!poi) return;
    
@@ -106,7 +98,6 @@
      marker.__type  = 'poi';
      marker.__poiId = id;
    
-     // InfoWindow με όνομα
      const iw = new google.maps.InfoWindow({ content: poi.name });
      iw.open(map, marker);
      marker.addListener('click', () => iw.open(map, marker));
@@ -143,12 +134,10 @@
      });
      marker.__type = 'user';
    
-     // InfoWindow
      const iw = new google.maps.InfoWindow({ content: title });
      iw.open(map, marker);
      marker.addListener('click', () => iw.open(map, marker));
    
-     // δεξί ή διπλό κλικ για διαγραφή
      marker.addListener('rightclick', () => removeUserMarker(marker));
      marker.addListener('dblclick',   () => removeUserMarker(marker));
    
@@ -174,7 +163,6 @@
        const li = document.createElement('li');
        li.textContent = m.__type === 'user' ? m.getTitle()
                                             : `POI: ${m.getTitle()}`;
-   
        li.onclick = () => { map.panTo(m.getPosition()); map.setZoom(16); };
    
        const del = document.createElement('button');
@@ -207,7 +195,8 @@
                          .map(m => ({ location: m.getPosition(), stopover: true }));
    
      directionsService.route(
-       { origin, destination, waypoints, travelMode: google.maps.TravelMode.DRIVING },
+       { origin, destination, waypoints,
+         travelMode: google.maps.TravelMode.DRIVING },
        (res, status) => {
          if (status !== 'OK') return console.error(status);
          directionsRenderer.setDirections(res);
