@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Campus Route Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2X6kzSDV9E2wo9wqr4ruQGQalETa7FK0&callback=initMap" async defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <button id="toggle-poi-btn">☰ Σημεία Ενδιαφέροντος</button>
+
+    <!-- POI Sidebar -->
+    <div id="poi-sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" id="close-poi">&times;</a>
+        <ul id="poi-list">
+            {% for poi in pois %}
+            <li>
+                <label>
+                    <input type="checkbox" data-poi-id="{{ poi.id }}">
+                    {{ poi.name }}
+                </label>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Route points sidebar -->
+    <div id="points-sidebar">
+        <h3>Σημεία Διαδρομής</h3>
+
+        <!-- Κουμπί Καθαρισμός -->
+        <button id="clear-btn" class="clear-btn">Καθαρισμός</button>
+
+        <ul id="points-list"></ul>
+        <p id="total-distance">Συνολική Απόσταση: 0 km</p>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+        const POIS = JSON.parse('{{ pois | tojson | safe }}');
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
