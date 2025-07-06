@@ -42,7 +42,28 @@ POIS = [
 
     {'id': 10, 'name': 'Τμήμα Ηλεκτρολόγων Μηχανικών και Τεχνολογίας Υπολογιστών',
      'lat': 38.28862326227145, 'lng': 21.788724020333586,
+     'icon': 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'},
+
+    {'id': 11, 'name': 'Τμήμα Μαθηματικών',
+     'lat': 38.29076696373512, 'lng': 21.79026132437305,
+     'icon': 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'},
+
+    {'id': 12, 'name': 'Τμήμα Φυσικής',
+     'lat': 38.29151641180384 , 'lng': 21.788501795218988,
+     'icon': 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'},
+
+    {'id': 13, 'name': 'Τμήμα Πολιτικών Μηχανικών',
+     'lat': 38.289025729028474, 'lng': 21.790823463982196,
+     'icon': 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'},
+
+    {'id': 14, 'name': 'Τμήμα Χημικών Μηχανικών',
+     'lat': 38.289348942833634, 'lng': 21.788885829413157,
+     'icon': 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'},
+
+    {'id': 15, 'name': 'Τμήμα Γεωλογίας',
+     'lat': 38.29210200681285, 'lng': 21.79012576370565,
      'icon': 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'}
+     
 ]
 
 
