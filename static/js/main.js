@@ -11,14 +11,21 @@
    let directionsRenderer;
    
    const routeMarkers  = [];   // όλοι οι markers (user + ενεργοί POIs) με τη σειρά που μπήκαν
+   const globalMarkers  = [];   // το συνολο των markers
    const poiMarkerRefs = {};   // poiId → marker
    
    const RED_PIN = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
    
+   function clearSteps() {
+    const el = document.getElementById('steps');
+    if (el) el.innerHTML = '';
+  }
+
    /* ──────────── ΚΑΘΑΡΙΣΜΟΣ ──────────── */
    function clearRoute() {
      routeMarkers.forEach(m => m.setMap(null));
      routeMarkers.length = 0;
+     globalMarkers.length = 0;
    
      Object.values(poiMarkerRefs).forEach(m => m.setMap(null));
      for (const id in poiMarkerRefs) delete poiMarkerRefs[id];
@@ -31,6 +38,8 @@
        'Συνολική Απόσταση: 0 km';
    
      directionsRenderer.set('directions', null);
+
+     clearSteps();
    }
    
    /* ──────────── INIT ──────────── */
@@ -58,7 +67,8 @@
      document.getElementById('toggle-poi-btn').onclick = toggle;
      document.getElementById('close-poi').onclick      = toggle;
      document.getElementById('clear-btn').onclick      = clearRoute;
-   
+     document.getElementById('mst-btn').onclick = updateRoute;
+
      /* checkbox POIs */
      document.querySelectorAll('#poi-list input[type="checkbox"]').forEach(cb => {
        cb.addEventListener('change', () => {
@@ -104,8 +114,8 @@
    
      poiMarkerRefs[id] = marker;
      routeMarkers.push(marker);
+     globalMarkers.push(marker);
      updatePointList();
-     updateRoute();
    }
    
    function removePoiMarker(id) {
@@ -123,7 +133,8 @@
    
    /* ──────────── USER MARKERS ──────────── */
    function addUserMarker(latLng) {
-     const userIdx = routeMarkers.filter(m => m.__type === 'user').length + 1;
+    const userIdx = globalMarkers.filter(m => m.__type === 'user').length + 1;
+    
      const title   = `Σημείο ${userIdx}`;
    
      const marker = new google.maps.Marker({
@@ -142,8 +153,8 @@
      marker.addListener('dblclick',   () => removeUserMarker(marker));
    
      routeMarkers.push(marker);
+     globalMarkers.push(marker);
      updatePointList();
-     updateRoute();
    }
    
    function removeUserMarker(marker) {
@@ -181,30 +192,103 @@
      });
    }
    
-   function updateRoute() {
-     if (routeMarkers.length < 2) {
-       directionsRenderer.set('directions', null);
-       document.getElementById('total-distance').textContent =
-         'Συνολική Απόσταση: 0 km';
-       return;
-     }
-   
-     const origin      = routeMarkers[0].getPosition();
-     const destination = routeMarkers.at(-1).getPosition();
-     const waypoints   = routeMarkers.slice(1, -1)
-                         .map(m => ({ location: m.getPosition(), stopover: true }));
-   
-     directionsService.route(
-       { origin, destination, waypoints,
-         travelMode: google.maps.TravelMode.DRIVING },
-       (res, status) => {
-         if (status !== 'OK') return console.error(status);
-         directionsRenderer.setDirections(res);
-   
-         const meters = res.routes[0].legs.reduce((s, l) => s + l.distance.value, 0);
-         document.getElementById('total-distance').textContent =
-           `Συνολική Απόσταση: ${(meters / 1000).toFixed(2)} km`;
-       }
-     );
-   }
-   
+
+  //  function updateRoute() {
+  //   if (routeMarkers.length < 2) {
+  //     directionsRenderer.set('directions', null);
+  //     document.getElementById('total-distance').textContent =
+  //       'Συνολική Απόσταση: 0 km';
+  //     document.getElementById('steps').innerHTML = '';
+  //     return;
+  //   }
+  
+  //   const origin      = routeMarkers[0].getPosition();
+  //   const destination = routeMarkers.at(-1).getPosition();
+  //   const waypoints   = routeMarkers.slice(1, -1)
+  //                        .map(m => ({ location: m.getPosition(), stopover: true }));
+  
+  //   directionsService.route(
+  //     { origin, destination, waypoints,
+  //       travelMode: google.maps.TravelMode.DRIVING,
+  //       language: 'el' },
+  //     (res, status) => {
+  //       if (status !== 'OK') return console.error(status);
+  //       directionsRenderer.setDirections(res);
+  
+  //       const meters = res.routes[0].legs.reduce((s, l) => s + l.distance.value, 0);
+  //       document.getElementById('total-distance').textContent =
+  //         `Συνολική Απόσταση: ${(meters / 1000).toFixed(2)} km`;
+  
+  //       // ✨ Εδώ γεμίζουμε τα βήματα
+  //       const stepsDiv = document.getElementById('steps');
+  //       stepsDiv.innerHTML = '';
+  //       res.routes[0].legs.forEach((leg, i) => {
+  //         const h = document.createElement('h4');
+  //         h.textContent = `Τμήμα ${i+1}: ${leg.start_address} → ${leg.end_address}`;
+  //         stepsDiv.appendChild(h);
+  
+  //         leg.steps.forEach(st => {
+  //           const p = document.createElement('p');
+  //           p.innerHTML = `${st.instructions} (${st.distance.text})`;
+  //           stepsDiv.appendChild(p);
+  //         });
+  //       });
+  //     }
+  //   );
+  // }
+
+  function updateRoute() {
+    const stepsDiv = document.getElementById('steps');
+    if (stepsDiv) stepsDiv.innerHTML = '';   // ✨ καθάρισμα μόνο αν υπάρχει
+  
+    if (routeMarkers.length < 2) {
+      directionsRenderer.set('directions', null);
+      document.getElementById('total-distance').textContent =
+        'Συνολική Απόσταση: 0 km';
+      return;
+    }
+  
+    const origin      = routeMarkers[0].getPosition();
+    const destination = routeMarkers.at(-1).getPosition();
+    const waypoints   = routeMarkers.slice(1, -1)
+                          .map(m => ({ location: m.getPosition(), stopover: true }));
+  
+    directionsService.route(
+      {
+        origin,
+        destination,
+        waypoints,
+        travelMode: google.maps.TravelMode.DRIVING
+        // Σημ.: το language εδώ αγνοείται από το JS Directions.
+        // Βάλε &language=el στην <script src=...> του Maps JS API.
+      },
+      (res, status) => {
+        if (status !== 'OK') {
+          console.error('Directions request failed: ', status);
+          directionsRenderer.set('directions', null);
+          return;
+        }
+  
+        directionsRenderer.setDirections(res);
+  
+        const meters = res.routes[0].legs.reduce((s, l) => s + l.distance.value, 0);
+        document.getElementById('total-distance').textContent =
+          `Συνολική Απόσταση: ${(meters / 1000).toFixed(2)} km`;
+  
+        // ✨ Γέμισε οδηγίες μόνο αν υπάρχει panel
+        if (stepsDiv) {
+          res.routes[0].legs.forEach((leg, i) => {
+            const h = document.createElement('h4');
+            h.textContent = `Τμήμα ${i+1}: ${leg.start_address} → ${leg.end_address}`;
+            stepsDiv.appendChild(h);
+  
+            leg.steps.forEach(st => {
+              const p = document.createElement('p');
+              p.innerHTML = `${st.instructions} (${st.distance.text})`;
+              stepsDiv.appendChild(p);
+            });
+          });
+        }
+      }
+    );
+  }
