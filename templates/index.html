@@ -1,356 +1,49 @@
-<!-- <!DOCTYPE html>
-<html lang="el">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mini Train – Πανεπιστήμιο Πατρών</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(to bottom right, #e3f2fd, #ffffff);
-      color: #333;
-    }
-  
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background-color: #1565c0;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.7rem;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      letter-spacing: 0.5px;
-    }
-  
-    main {
-      max-width: 1200px;
-      margin: auto;
-      padding: 2rem 1rem;
-    }
-  
-    #map {
-      width: 100%;
-      height: 500px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      animation: fadeIn 1s ease-in-out;
-    }
-  
-    .card {
-      background: #ffffff;
-      padding: 1.5rem;
-      margin-top: 2rem;
-      border-radius: 14px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      animation: fadeInUp 0.6s ease;
-    }
-  
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-    }
-  
-    h2 {
-      margin-top: 0;
-      color: #0d47a1;
-    }
-  
-    .points-list label {
-      display: block;
-      padding: 0.6rem 1rem;
-      margin: 0.5rem 0;
-      background: #f1f8ff;
-      border-left: 5px solid #2196f3;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background 0.3s;
-    }
-  
-    .points-list label:hover {
-      background: #e3f2fd;
-    }
-  
-    .buttons {
-      margin-top: 1.5rem;
-    }
-  
-    .buttons button {
-      padding: 0.75rem 1.5rem;
-      margin-right: 1rem;
-      background: linear-gradient(135deg, #1e88e5, #1565c0);
-      border: none;
-      color: white;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      transition: background 0.3s, transform 0.2s;
-    }
-  
-    .buttons button:hover {
-      background: linear-gradient(135deg, #42a5f5, #1976d2);
-      transform: scale(1.05);
-    }
-  
-    .routing-info ul {
-      padding-left: 1rem;
-    }
-  
-    .routing-info li {
-      margin-bottom: 0.5rem;
-      line-height: 1.6;
-    }
-  
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
-    }
-  
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-  
-</head>
-<body>
-  <header>🚆 Mini Train – Πανεπιστήμιο Πατρών</header>
-  <main>
-    <div id="map"></div>
-
-    <div class="card">
-      <h2>Επιλέξτε τα σημεία ενδιαφέροντος:</h2>
-      <div class="points-list">
-        <label><input type="checkbox" value="Πρυτανεία"> Πρυτανεία</label>
-        <label><input type="checkbox" value="Πάρκο Ειρήνης"> Πάρκο Ειρήνης</label>
-        <label><input type="checkbox" value="Φοιτητική Εστία"> Φοιτητική Εστία</label>
-        <label><input type="checkbox" value="Συνεδριακό & Πολιτιστικό Κέντρο"> Συνεδριακό & Πολιτιστικό Κέντρο</label>
-        <label><input type="checkbox" value="Βιβλιοθήκη & Κέντρο Πληροφόρησης"> Βιβλιοθήκη & Κέντρο Πληροφόρησης</label>
-        <label><input type="checkbox" value="Μουσείο Επιστημών και Τεχνολογίας"> Μουσείο Επιστημών και Τεχνολογίας</label>
-        <label><input type="checkbox" value="Τμήμα Μηχανολόγων και Αεροναυπηγών Μηχανικών"> Τμήμα Μηχανολόγων και Αεροναυπηγών Μηχανικών</label>
-        <label><input type="checkbox" value="Τμήμα Πολιτικών Μηχανικών"> Τμήμα Πολιτικών Μηχανικών</label>
-        <label><input type="checkbox" value="Τμήμα Μηχανικών Η/Υ και Πληροφορικής"> Τμήμα Μηχανικών Η/Υ και Πληροφορικής</label>
-        <label><input type="checkbox" value="Τμήμα Ηλεκτρολόγων Μηχανικών και Τεχνολογίας Υπολογιστών"> Τμήμα Ηλεκτρολόγων Μηχανικών και Τεχνολογίας Υπολογιστών</label>
-
-      </div>
-      <div class="buttons">
-        <button id="calculate">🔍 Υπολόγισμός MST</button>
-        <button id="reset">♻️ Επαναφορά</button>
-      </div>
-    </div>
-
-    <div class="card routing-info" id = "directions-panel">
-      <h2>📌 Οδηγίες Διαδρομής</h2>
-      <ul id="directions-content"></ul>
-    </div>
-  </main>
-
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2X6kzSDV9E2wo9wqr4ruQGQalETa7FK0&callback=initMap" async defer></script>
-</body>
-</html> -->
 <!DOCTYPE html>
 <html lang="el">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mini Train – Πανεπιστήμιο Πατρών</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(to right, #e3f2fd, #ffffff);
-      color: #333;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    header {
-      background-color: #1976d2;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 500;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-    }
-
-    main {
-      position: relative;
-      top: 64px; /* header height */
-      height: calc(100vh - 64px);
-      display: flex;
-    }
-
-    #map {
-      flex: 1;
-      height: 100%;
-      margin: 0 300px 0 0; /* Leave space on right for routing info */
-      border-radius: 0;
-    }
-
-    /* Hover Menu */
-    .side-wrapper {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%); /* Center the side menu horizontally */
-      z-index: 1100;
-    }
-
-    .menu-toggle {
-      background-color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      padding: 0.7rem 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .side-panel {
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%); /* Center the side panel horizontally */
-      width: 280px;
-      background: #ffffff;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-      padding: 1rem;
-      display: none;
-      border-radius: 0 0 8px 8px;
-    }
-
-    .side-wrapper:hover .side-panel {
-      display: block;
-    }
-
-    .points-list label {
-      display: block;
-      padding: 0.5rem;
-      margin: 0.3rem 0;
-      background: #f5faff;
-      border-left: 4px solid #1976d2;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    /* Buttons */
-    .buttons {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      z-index: 1100;
-    }
-
-    .buttons button {
-      padding: 0.6rem 1.2rem;
-      margin-right: 1rem;
-      background: #1976d2;
-      border: none;
-      color: white;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    /* Routing Info */
-    .routing-info {
-      position: absolute;
-      top: 64px;
-      right: 0;
-      width: 300px;
-      height: calc(100vh - 64px);
-      overflow-y: auto;
-      background: white;
-      padding: 1rem;
-      border-left: 2px solid #1976d2;
-      box-shadow: -2px 0 12px rgba(0,0,0,0.1);
-      z-index: 1000;
-    }
-
-    .routing-info h2 {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .routing-info ul {
-      padding-left: 1rem;
-    }
-
-    .routing-info li {
-      margin-bottom: 0.5rem;
-    }
-
-    @media (max-width: 768px) {
-      .routing-info {
-        display: none;
-      }
-      #map {
-        margin: 0;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Campus Route Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDBCh4y2KHqGR00mbelgexQW5KkWYHan-Q&callback=initMap&language=el" async defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <header>🚆 Mini Train – Πανεπιστήμιο Πατρών</header>
-  <main>
+    <button id="toggle-poi-btn">☰ Σημεία Ενδιαφέροντος</button>
+
+    <!-- POI Sidebar -->
+    <div id="poi-sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" id="close-poi">&times;</a>
+        <ul id="poi-list">
+            {% for poi in pois %}
+            <li>
+                <label>
+                    <input type="checkbox" data-poi-id="{{ poi.id }}">
+                    {{ poi.name }}
+                </label>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Route points sidebar -->
+    <div id="points-sidebar">
+        <h3>Σημεία Διαδρομής</h3>
+
+        <button id="mst-btn" class="calculate-btn">Υπολογισμός MST</button>
+
+        <!-- Κουμπί Καθαρισμός -->
+        <button id="clear-btn" class="clear-btn">Καθαρισμός</button>
+
+        <ul id="points-list"></ul>
+        <p id="total-distance">Συνολική Απόσταση: 0 km</p>
+        <div id="steps"></div>
+    </div>
+
     <div id="map"></div>
 
-    <!-- Hoverable Side Menu -->
-    <div class="side-wrapper">
-      <button class="menu-toggle">📍 Σημεία Ενδιαφέροντος</button>
-      <div class="side-panel" id="sidePanel">
-        <h2>Σημεία Ενδιαφέροντος</h2>
-        <div class="points-list">
-          <label><input type="checkbox" value="Πρυτανεία"> Πρυτανεία</label>
-          <label><input type="checkbox" value="Πάρκο Ειρήνης"> Πάρκο Ειρήνης</label>
-          <label><input type="checkbox" value="Φοιτητική Εστία"> Φοιτητική Εστία</label>
-          <label><input type="checkbox" value="Συνεδριακό & Πολιτιστικό Κέντρο"> Συνεδριακό & Πολιτιστικό Κέντρο</label>
-          <label><input type="checkbox" value="Βιβλιοθήκη & Κέντρο Πληροφόρησης"> Βιβλιοθήκη & Κέντρο Πληροφόρησης</label>
-          <label><input type="checkbox" value="Μουσείο Επιστημών και Τεχνολογίας"> Μουσείο Επιστημών και Τεχνολογίας</label>
-          <label><input type="checkbox" value="Τμήμα Μηχανολόγων και Αεροναυπηγών Μηχανικών"> Τμήμα Μηχανολόγων και Αεροναυπηγών Μηχανικών</label>
-          <label><input type="checkbox" value="Τμήμα Πολιτικών Μηχανικών"> Τμήμα Πολιτικών Μηχανικών</label>
-          <label><input type="checkbox" value="Τμήμα Μηχανικών Η/Υ και Πληροφορικής"> Τμήμα Μηχανικών Η/Υ και Πληροφορικής</label>
-          <label><input type="checkbox" value="Τμήμα Ηλεκτρολόγων Μηχανικών και Τεχνολογίας Υπολογιστών"> Τμήμα Ηλεκτρολόγων Μηχανικών και Τεχνολογίας Υπολογιστών</label>
-        </div>
-      </div>
-    </div>
-
-    <!-- Buttons -->
-    <div class="buttons">
-      <button id="calculate">🔍 Υπολόγισμός MST</button>
-      <button id="reset">♻️ Επαναφορά</button>
-    </div>
-
-    <!-- Routing Panel -->
-    <div class="routing-info" id="directions-panel">
-      <h2>📌 Οδηγίες Διαδρομής</h2>
-      <ul id="directions-content"></ul>
-    </div>
-  </main>
-
-  <!-- Scripts -->
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2X6kzSDV9E2wo9wqr4ruQGQalETa7FK0&callback=initMap" async defer></script>
+    <script>
+        const POIS = JSON.parse('{{ pois | tojson | safe }}');
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
