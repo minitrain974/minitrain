@@ -126,3 +126,22 @@ html, body {
   .clear-btn:hover {
     background-color: #b71c1c;
 }
+
+.calculate-btn {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #1cb721;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .calculate-btn:hover {
+    background-color: #1cb721;
+}
